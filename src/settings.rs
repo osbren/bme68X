@@ -1,6 +1,9 @@
 use bitflags::bitflags;
 use core::time::Duration;
 
+use crate::{Bme680, VarientId};
+use crate::constants::*;
+
 /// Over-sampling settings
 #[derive(Copy, Clone, Debug)]
 #[repr(u8)]
@@ -133,7 +136,7 @@ bitflags! {
         const GAS_MEAS_SEL = 8;
         /// To set filter setting.
         const FILTER_SEL = 16;
-        /// To set humidity control setting.
+        /// To set heater control setting.
         const HCNTRL_SEL = 32;
         /// To set run gas setting.
         const RUN_GAS_SEL = 64;
@@ -141,6 +144,52 @@ bitflags! {
         const NBCONV_SEL = 128;
         /// To set all gas sensor related settings
         const GAS_SENSOR_SEL = Self::GAS_MEAS_SEL.bits | Self::RUN_GAS_SEL.bits | Self::NBCONV_SEL.bits;
+    }
+}
+
+impl DesiredSensorSettings {
+    fn bit_pos (self) -> Option<u8> {
+        match self {
+            DesiredSensorSettings::OST_SEL => Some(BME68X_OST_POS),
+            DesiredSensorSettings::OSP_SEL => Some(BME68X_OSP_POS),
+            DesiredSensorSettings::OSH_SEL => Some(BME68X_OSH_POS),
+            DesiredSensorSettings::GAS_MEAS_SEL => None,
+            DesiredSensorSettings::FILTER_SEL => Some(BME68X_FILTER_POS),
+            DesiredSensorSettings::HCNTRL_SEL => Some(BME68X_HCTRL_POS),
+            DesiredSensorSettings::RUN_GAS_SEL => Some(BME68X_RUN_GAS_POS),
+            DesiredSensorSettings::NBCONV_SEL => Some(BME68X_NBCONV_POS),
+            DesiredSensorSettings::GAS_SENSOR_SEL => None,
+            _ => None,
+        }
+    }
+    fn bit_msk (self) -> Option<u8> {
+        match self {
+            DesiredSensorSettings::OST_SEL => Some(BME68X_OST_MSK),
+            DesiredSensorSettings::OSP_SEL => Some(BME68X_OSP_MSK),
+            DesiredSensorSettings::OSH_SEL => Some(BME68X_OSH_MSK),
+            DesiredSensorSettings::GAS_MEAS_SEL => None,
+            DesiredSensorSettings::FILTER_SEL => Some(BME68X_FILTER_MSK),
+            DesiredSensorSettings::HCNTRL_SEL => Some(BME68X_HCTRL_MSK),
+            DesiredSensorSettings::RUN_GAS_SEL => Some(BME68X_RUN_GAS_MSK),
+            DesiredSensorSettings::NBCONV_SEL => Some(BME68X_NBCONV_MSK),
+            DesiredSensorSettings::GAS_SENSOR_SEL => None,
+            _ => None,
+        }
+    }
+    pub fn set_bits (self, data: u8, value: u8) -> Option<u8> {
+        let pos = self.bit_pos().unwrap_or(0);
+
+        return match self.bit_msk() {
+            Some(msk) => Some(BME68X_SET_BITS(data, msk, pos, value)),
+            None => None,
+        };
+    }
+    pub fn get_bits (self, data: u8) -> Option<u8> {
+        let pos = self.bit_pos().unwrap_or(0);
+        return match self.bit_msk() {
+            Some(msk) => Some(BME68X_GET_BITS(data, msk, pos)),
+            None => None,
+        };   
     }
 }
 
@@ -165,14 +214,17 @@ bitflags! {
 pub struct SettingsBuilder {
     desired_settings: DesiredSensorSettings,
     sensor_settings: SensorSettings,
+    varient_id: VarientId,
 }
 
 /// Tuple of desired sensor settings flags and sensor settings
 pub type Settings = (SensorSettings, DesiredSensorSettings);
 
 impl SettingsBuilder {
-    pub fn new() -> SettingsBuilder {
-        SettingsBuilder::default()
+    pub fn new<I2C, D>(bme68x: &Bme680<I2C, D>) -> SettingsBuilder {
+        let mut settings = SettingsBuilder::default();
+        settings.varient_id = bme68x.varient_id;
+        settings
     }
 
     pub fn with_temperature_filter(mut self, filter: IIRFilterSize) -> SettingsBuilder {
@@ -212,7 +264,7 @@ impl SettingsBuilder {
         mut self,
         heatr_dur: Duration,
         heatr_temp: u16,
-        ambient_temperature: i8,
+        ambient_temperature: i8
     ) -> SettingsBuilder {
         self.sensor_settings.gas_sett.heatr_dur = Some(heatr_dur);
         self.sensor_settings.gas_sett.heatr_temp = Some(heatr_temp);

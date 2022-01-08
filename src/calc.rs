@@ -3,6 +3,8 @@ use core::time::Duration;
 
 pub struct Calc {}
 
+use crate::constants::*;
+
 impl Calc {
     pub fn calc_heater_res(calib: &CalibData, amb_temp: i8, temp: u16) -> u8 {
         // cap temperature
@@ -123,49 +125,23 @@ impl Calc {
         calc_hum as u32
     }
 
-    pub fn calc_gas_resistance(calib: &CalibData, gas_res_adc: u16, gas_range: u8) -> u32 {
-        let lookup_table1: [u32; 16] = [
-            2147483647u32,
-            2147483647u32,
-            2147483647u32,
-            2147483647u32,
-            2147483647u32,
-            2126008810u32,
-            2147483647u32,
-            2130303777u32,
-            2147483647u32,
-            2147483647u32,
-            2143188679u32,
-            2136746228u32,
-            2147483647u32,
-            2126008810u32,
-            2147483647u32,
-            2147483647u32,
-        ];
-        let lookup_table2: [u32; 16] = [
-            4096000000u32,
-            2048000000u32,
-            1024000000u32,
-            512000000u32,
-            255744255u32,
-            127110228u32,
-            64000000u32,
-            32258064u32,
-            16016016u32,
-            8000000u32,
-            4000000u32,
-            2000000u32,
-            1,
-            500000u32,
-            250000u32,
-            125000u32,
-        ];
+    pub fn calc_gas_resistance_low(calib: &CalibData, gas_res_adc: u16, gas_range: u8) -> u32 {
         let var1: i64 = ((1340 + 5 * calib.range_sw_err as i64)
-            * lookup_table1[gas_range as usize] as i64)
+            * GAS_RES_LOOKUP_TABLE_1[gas_range as usize] as i64)
             >> 16;
         let var2: u64 = (((gas_res_adc as i64) << 15) - 16777216 + var1) as u64;
-        let var3: i64 = (lookup_table2[gas_range as usize] as i64 * var1) >> 9;
+        let var3: i64 = (GAS_RES_LOOKUP_TABLE_2[gas_range as usize] as i64 * var1) >> 9;
         let calc_gas_res: u32 = ((var3 + ((var2 as i64) >> 1i64)) / var2 as i64) as u32;
         calc_gas_res
+    }
+
+    pub fn calc_gas_resistance_high(gas_res_adc: u16, gas_range: u8) -> u32 {
+        let var1: u32 = 262144u32 >> gas_range;
+        let var2: i32 = (gas_res_adc as i32 - 512i32) * 3i32 + 4096i32;
+    
+        /* multiplying 10000 then dividing then multiplying by 100 instead of multiplying by 1000000 to prevent overflow */
+        let calc_gas_res: u32 = (10000u32 * var1) / (var2 as u32) * 100;
+    
+        return calc_gas_res;
     }
 }

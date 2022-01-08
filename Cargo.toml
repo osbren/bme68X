@@ -25,5 +25,5 @@ influx_db_client = { version = "0.5", default-features= false, features = ["rust
 tokio = {version = "1.5", features = ["full"] }
 url = "2.1"
 
-[target.'cfg(target_os = "linux")'.dev-dependencies]
+[target.'cfg(unix)'.dev-dependencies]
 linux-embedded-hal = "0.3"

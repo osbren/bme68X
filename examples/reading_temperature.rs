@@ -20,7 +20,7 @@ fn main(
     let mut dev = Bme680::init(i2c, &mut delayer, I2CAddress::Primary)?;
     let mut delay = Delay {};
 
-    let settings = SettingsBuilder::new()
+    let settings = SettingsBuilder::new(&dev)
         .with_humidity_oversampling(OversamplingSetting::OS2x)
         .with_pressure_oversampling(OversamplingSetting::OS4x)
         .with_temperature_oversampling(OversamplingSetting::OS8x)
