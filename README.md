@@ -1,3 +1,14 @@
+# Note
+Forked from https://github.com/marcelbuesing/bme680
+
+Adds BME688 support -- untested against a known good source of readings.
+
+Not submitting these changes to the source repo. A flurry of changes happened on this repo to get the BME688 working, many of which are breaking and messy.
+
+Just a note of convience: upon Bme680::init being called, the bme60X is polled for the varient. There is not a setting to choose between the varients.
+
+# Original Author Readme
+
 BME680 + Rust [![Actions Status](https://github.com/marcelbuesing/bme680/workflows/Continuous%20integration/badge.svg)](https://github.com/marcelbuesing/bme680/actions?query=workflow%3A"Continuous+integration")
 [![Cargo Deny Status](https://img.shields.io/badge/cargo--deny-license%20checked-green)](https://github.com/marcelbuesing/bme680/actions?query=workflow%3A"Continuous+integration")
 =============
