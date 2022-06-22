@@ -1,17 +1,16 @@
-#![no_std]
-
-use bme680::*;
-use core::result;
-use core::time::Duration;
-use embedded_hal::blocking::delay::DelayMs;
-use embedded_hal::blocking::i2c;
-use linux_embedded_hal as hal;
-use linux_embedded_hal::Delay;
-use log::info;
-
+#[cfg(unix)]
 fn main(
 ) -> result::Result<(), Error<<hal::I2cdev as i2c::Read>::Error, <hal::I2cdev as i2c::Write>::Error>>
 {
+    use bme680::*;
+    use core::result;
+    use core::time::Duration;
+    use embedded_hal::blocking::delay::DelayMs;
+    use embedded_hal::blocking::i2c;
+    use log::info;
+    use linux_embedded_hal as hal;
+    use linux_embedded_hal::Delay;
+
     env_logger::init();
 
     let i2c = hal::I2cdev::new("/dev/i2c-1").unwrap();
@@ -54,4 +53,9 @@ fn main(
         info!("Humidity {}%", data.humidity_percent());
         info!("Gas Resistence {}Ω", data.gas_resistance_ohm());
     }
+}
+
+#[cfg(not(unix))]
+fn main() {
+    println!("OS not supported for this example.");
 }
