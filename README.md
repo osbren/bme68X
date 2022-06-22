@@ -1,7 +1,7 @@
 # Note
 Forked from https://github.com/marcelbuesing/bme680
 
-Adds BME688 support -- untested against a known good source of readings.
+Adds BME688 support -- untested against a known good source of readings. All sensors appear to be returning data that corresponds to what you'd expect from sitting in a window over the course of 6months. Well, temp needs its offset adjusted, of course.
 
 Not submitting these changes to the source repo at this time. A flurry of changes happened on this repo to get the BME688 working, many of which are messy.
 
