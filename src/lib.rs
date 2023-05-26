@@ -101,8 +101,7 @@ use crate::hal::i2c::I2c;
 use core::time::Duration;
 use core::{marker::PhantomData, result};
 use embedded_hal as hal;
-use log::{debug, error, info};
-
+use defmt::{info, error, debug};
 
 /// All possible errors in this crate
 #[derive(Debug)]
