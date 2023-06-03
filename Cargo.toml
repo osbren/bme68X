@@ -6,7 +6,7 @@ license = "MIT"
 name = "bme680"
 repository = "https://github.com/marcelbuesing/bme680-hal"
 version = "0.6.0"
-edition = "2018"
+edition = "2021"
 
 [badges]
 travis-ci = { repository = "https://github.com/marcelbuesing/bme680-hal", branch = "master" }
@@ -14,16 +14,15 @@ maintenance = { status = "passively-maintained" }
 
 [dependencies]
 bitflags = "1.2"
-embedded-hal = "=1.0.0-alpha.5"
-log = "0.4"
+embedded-hal = "=1.0.0-alpha.10"
+defmt = "0.3"
 
 [dev-dependencies]
-env_logger = "0.9"
-futures = { version = "0.3" }
-i2cdev = "0.5"
-influx_db_client = { version = "0.5", default-features= false, features = ["rustls-tls"] }
-tokio = {version = "1.5", features = ["full"] }
-url = "2.1"
 
-[target.'cfg(target_os = "linux")'.dev-dependencies]
-linux-embedded-hal = "0.4.0-alpha.1"
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+rp-pico = "0.7"
+rp2040-hal = {version = "0.8.2", features = ["eh1_0_alpha"] }
+defmt-rtt = "0.4"
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+fugit = "0.3.6"
